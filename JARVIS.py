@@ -1,10 +1,13 @@
 import os
+import datetime
+import subprocess
+import webbrowser
 import speech_recognition as sr
 import pyttsx3
-
+import pyautogui
+import pywhatkit
 from dotenv import load_dotenv
 from groq import Groq
-
 # Load .env file
 load_dotenv()
 
@@ -52,6 +55,83 @@ print("*" * 40)
 
 # Starting message
 speak("Hello Sir. I am ready.")
+
+def execute_command(command):
+
+    command = command.lower()
+
+    # Open Chrome
+    if "chrome" in command:
+        speak("Opening Chrome")
+
+        program = r"C:\Program Files\Google\Chrome\Application\chrome.exe"
+
+        subprocess.Popen([program])
+
+        return True
+
+    # Tell Time
+    elif "time" in command:
+
+        current_time = datetime.datetime.now().strftime("%I:%M %p")
+        print(f"The time is {current_time}")
+
+        speak(f"The time is {current_time}")
+
+        return True
+
+    # Open Google
+    elif "open google" in command:
+
+        speak("Opening Google")
+
+        webbrowser.open("https://www.google.com")
+
+        return True
+
+    # Open YouTube
+    elif "open youtube" in command:
+
+        speak("Opening YouTube")
+
+        webbrowser.open("https://www.youtube.com")
+
+        return True
+    
+    # Open Calculator
+    elif "calculator" in command or "open calculator" in command:
+
+        speak("Opening Calculator")
+
+        subprocess.Popen("calc.exe")
+
+        return True
+    
+    # Take Screenshot
+    elif "screenshot" in command or "take screenshot" in command:
+
+        filename = f"screenshot_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.png"
+
+        screenshot = pyautogui.screenshot()
+
+        screenshot.save(filename)
+        print(f"Screenshot saved as {filename}")
+        speak(f"Screenshot saved as {filename}")
+
+        return True
+    
+    # Play on YouTube
+    elif "play" in command:
+
+        song = command.replace("play", "").strip()
+
+        speak(f"Playing {song}")
+
+        pywhatkit.playonyt(song)
+
+        return True
+
+    return False
 
 while True:
 
@@ -102,7 +182,11 @@ while True:
             speak(response_text)
 
             break
-
+        
+        # Execute built-in commands
+        if execute_command(user_input):
+            continue
+        
         # Send message to Groq
         chat_completion = client.chat.completions.create(
             messages=[
@@ -141,3 +225,6 @@ while True:
 
     except Exception as e:
         print(f"Error: {e}")
+
+
+# pip install groq python-dotenv SpeechRecognition PyAudio pyttsx3 pyautogui
